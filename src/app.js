@@ -1,9 +1,13 @@
 const express = require("express");
+require("dotenv").config();
 const mongoose = require("mongoose");
 const app = express();
 const path = require("path");
 const ejs = require("ejs");
+const bcrypt = require("bcryptjs");
 const sessions = require("express-session");
+const passport = require("passport");
+const GoogleStrategy = require("passport-google-oauth20").Strategy;
 // const collection = require("./mongodb");
 const PosT = require("./postdb");
 const Profile = require("./profiledb");
@@ -32,17 +36,75 @@ app.use(express.static(path.join(__dirname, "../public")));
 app.use(express.urlencoded({ extended: false }));
 app.use(
   sessions({
-    secret: "secret key",
-    saveUninitialized: true,
+    secret: process.env.SESSION_SECRET,
+    saveUninitialized: false,
     resave: false,
   })
 );
+app.use(passport.initialize());
+app.use(passport.session());
 
 const visitSchema = new mongoose.Schema({
   visits: Number
 });
 
 const visits = mongoose.model("visits", visitSchema);
+
+// Passport: serialize/deserialize
+passport.serializeUser((user, done) => {
+  done(null, { id: user._id, username: user.username, email: user.email, type: user.type });
+});
+
+passport.deserializeUser((obj, done) => {
+  done(null, obj);
+});
+
+// Passport: Google Strategy
+passport.use(
+  new GoogleStrategy(
+    {
+      clientID: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+    },
+    async (accessToken, refreshToken, profile, done) => {
+      try {
+        const googleId = profile.id;
+        const email = profile.emails && profile.emails[0] ? profile.emails[0].value : undefined;
+        const displayName = profile.displayName || (email ? email.split("@")[0] : `user_${googleId.slice(-6)}`);
+
+        let user = await Profile.findOne({ googleId });
+        if (!user && email) {
+          user = await Profile.findOne({ email });
+        }
+        if (!user) {
+          user = await Profile.create({
+            username: displayName,
+            fullname: displayName,
+            email: email || `${googleId}@example.invalid`,
+            password: "", // OAuth user; password not used
+            type: "user",
+            googleId,
+            dp: "",
+            bio: "",
+            weblink: "",
+            facebook: "",
+            whatsapp: "",
+            twitter: "",
+            instagram: "",
+            phoneno: "",
+          });
+        } else if (!user.googleId) {
+          user.googleId = googleId;
+          await user.save();
+        }
+        return done(null, user);
+      } catch (err) {
+        return done(err);
+      }
+    }
+  )
+);
 
 app.get("/home", async (req, res) => {
   if (req.session.useremail) {
@@ -68,6 +130,25 @@ app.get("/", (req, res) => {
   res.render("login");
 });
 
+// OAuth routes
+app.get(
+  "/auth/google",
+  passport.authenticate("google", { scope: ["profile", "email"] })
+);
+
+app.get(
+  "/auth/google/callback",
+  passport.authenticate("google", { failureRedirect: "/" }),
+  async (req, res) => {
+    // Bridge Passport user into existing session fields used by views
+    const user = req.user;
+    req.session.useremail = user.email;
+    req.session.username = user.username;
+    req.session.type = user.type || "user";
+    res.redirect("/home");
+  }
+);
+
 app.get("/logout", (req, res) => {
   req.session.destroy(); 
   imagename=null
@@ -86,10 +167,11 @@ app.post("/signup", async (req, res) => {
   //   type: "user",
   // };
   if(!userExists){
+  const hashedPassword = await bcrypt.hash(req.body.password, 12);
   const profileData = {
     username: req.body.name,
     email: req.body.email,
-    password: req.body.password,
+    password: hashedPassword,
     type: "user",
     fullname:req.body.name,
     dp: "",
@@ -116,7 +198,11 @@ app.post("/signup", async (req, res) => {
 app.post("/login", async (req, res) => {
   try {
     const check = await Profile.findOne({ email: req.body.email });
-    if (check.password === req.body.password) {
+    if (!check) {
+      return res.send("<script>alert('Wrong details');window.location.href = '/'</script>");
+    }
+    const isValid = await bcrypt.compare(req.body.password, check.password);
+    if (isValid) {
       if (check.type === "admin") {
         req.session.useremail = check.email;
         req.session.username = check.username;
