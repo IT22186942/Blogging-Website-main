@@ -1,43 +1,73 @@
+# Blogging Website – Security Hardening and OAuth Integration
 
-## Blogging-Website
-![Repo Views](https://views.whatilearened.today/views/github/arjuncvinod/Blogging-Website.svg?cache=remove)
-### Languages Used:
-#### Front end : ![HTML5](https://img.shields.io/badge/html5-%23E34F26.svg?style=flat&logo=html5&logoColor=white) ![CSS3](https://img.shields.io/badge/css3-%231572B6.svg?style=flat&logo=css3&logoColor=white) 
-#### Backend : ![NodeJS](https://img.shields.io/badge/node.js-6DA55F?style=flat&logo=node.js&logoColor=white) ![Express.js](https://img.shields.io/badge/express.js-%23404d59.svg?style=flat&logo=express&logoColor=%2361DAFB)
-#### Database : ![MongoDB](https://img.shields.io/badge/MongoDB-%234ea94b.svg?style=flat&logo=mongodb&logoColor=white) <br />
-### Live Preview : [www.myblog.com](https://blogwebsite-1rl3.onrender.com/)
-## Installation
+## Project and Members
 
-### Clone the Repository
+- Member Name: ABishek S
+- Index Number: IT22186942
+- Group ID: 113
 
-```bash
-git clone https://github.com/arjuncvinod/Blogging-Website.git
-cd Blogging-Website
+## Repository Links
+
+- Original Project Repository (reference): [https://github.com/arjuncvinod/Blogging-Website.git]
+- Modified Project Repository (after fixes): [https://github.com/IT22186942/Blogging-Website-main.git]
+
+## Demo Video
+
+- YouTube (vulnerabilities, fixes, and OAuth/OpenID Connect): [PASTE_LINK_HERE]
+
+## Overview
+
+This is a Node.js + Express + EJS blogging application backed by MongoDB (Mongoose). I assessed security, fixed two high‑risk issues (hardcoded MongoDB credentials and plaintext password storage), and implemented Google OAuth to strengthen authentication and usability.
+
+### Tech Stack
+
+- Backend: Node.js, Express, Mongoose
+- Templating: EJS
+- Authentication: express‑session, Google OAuth (Passport)
+- Database: MongoDB
+
+## What Was Fixed
+
+- Removed hardcoded MongoDB credentials from source; now loaded from environment variables via dotenv.
+- Replaced plaintext password storage with bcrypt hashing on signup and bcrypt.compare on login.
+- Implemented Google OAuth (Passport Google Strategy) and added a "Sign in with Google" button on the login page.
+
+## How to Run (Local)
+
+1. Create a `.env` file in the project root with:
+
 ```
-### Install dependencies
-```console 
+MONGODB_URI=mongodb://127.0.0.1:27017/myblog
+SESSION_SECRET=change-me
+GOOGLE_CLIENT_ID=[PASTE]
+GOOGLE_CLIENT_SECRET=[PASTE]
+GOOGLE_CALLBACK_URL=http://localhost:3000/auth/google/callback
+PORT=3000
+```
+
+2. Install dependencies:
+
+```
 npm install
 ```
-### Start
-```console
-node src/App.js
+
+3. Start the server:
+
 ```
-```sh
-The Website will be available at http://localhost:3000
+node src/app.js
 ```
- **Screenshots**: 
 
-<h3 align="center"> Login section</h3>
-<img src="SH4.jpg">
-<h3 align="center"> Home Page</h3>
-<img src="SH2.jpg">
-<h3 align="center"> Post View</h3>
-<img src="SH1.jpg">
-<h3 align="center"> Profile Section</h3>
-<img src="SH3.jpg">
-<h3 align="center"> Admin Dashboard </h3>
+4. Access the application:
 
-![image](https://github.com/arjuncvinod/Blogging-Website/assets/68469520/4c9f0f3c-3ac7-43e9-9854-d671f237c795)
+- Login page: http://localhost:3000/
+- Google Sign‑in: http://localhost:3000/auth/google
 
-<h3  align="center" > Don't forget to hit the :star: if you like this repo. </h3>
-<h1 align="center"> Made with ❤️ by <a href="https://arjuncvinod.github.io">Arjun</a> </h1>
+## Notes for Reviewers
+
+- Two high‑risk vulnerabilities were addressed: (1) hardcoded MongoDB credentials; (2) plaintext password storage.
+- Further hardening recommended for production: CSP/HSTS via helmet, CSRF protection, secure session cookie flags, persistent session store, and dependency upgrades where safe.
+
+## Credits
+
+- Original project reference: [https://github.com/arjuncvinod/Blogging-Website.git]
+- Modified by: ABishek S (IT22186942), Group 113
