@@ -13,7 +13,7 @@
 
 ## Demo Video
 
-- YouTube (vulnerabilities, fixes, and OAuth/OpenID Connect): [PASTE_LINK_HERE]
+- YouTube (vulnerabilities, fixes, and OAuth/OpenID Connect): [(https://youtu.be/zcmziy3CQWw)]
 
 ## Overview
 
