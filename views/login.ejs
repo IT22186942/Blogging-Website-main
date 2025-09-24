@@ -36,7 +36,11 @@
                         <label>Password</label>
                         <input type="password" name="password" required>
                         <input type="submit" value="Register" class="lg-btn">
-
+                        <div class="oauth-divider"><span>or</span></div>
+                        <a class="google-btn" href="/auth/google">
+                            <span class="g-logo" aria-hidden="true"></span>
+                            <span class="g-text">Sign in with Google</span>
+                        </a>
                     </form>
                 </div>
                 </div>
@@ -63,8 +67,13 @@
                         <input type="email" name="email"  required>
                         <label>Password</label>
                         <input type="password" name="password" required>
-                        <input type="submit" value="Login" class="lg-btn">
-
+                        <div class="auth-actions">
+                            <input type="submit" value="Login" class="lg-btn">
+                            <a class="google-btn" href="/auth/google" title="Sign in with Google">
+                                <span class="g-logo" aria-hidden="true"></span>
+                                <span class="g-text">Sign in with Google</span>
+                            </a>
+                        </div>
                     </form>
                 </div>
                 </div>
